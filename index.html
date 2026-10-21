@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CNC Re-setting Machine Audit</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- jsQR Engine for real-time camera scanning -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 pb-24">
+
+  <!-- Header -->
+  <header class="bg-blue-700 text-white p-4 shadow-md sticky top-0 z-30 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <i data-lucide="cpu" class="w-6 h-6 text-yellow-300"></i>
+      <div>
+        <h1 class="font-bold text-base leading-tight">Re-setting Machine Audit (CNC)</h1>
+        <p class="text-xs text-blue-200">E&H Precision (Thailand)</p>
+      </div>
+    </div>
+    <span class="text-xs bg-blue-800 border border-blue-600 px-2 py-1 rounded-md text-blue-100">Live Scanner</span>
+  </header>
+
+  <main class="max-w-lg mx-auto p-3 space-y-3">
+
+    <!-- Live Camera Scanner Box (Works 100% on GitHub Pages HTTPS) -->
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i data-lucide="qr-code" class="w-5 h-5 text-blue-600"></i>
+          <div>
+            <h3 class="font-semibold text-sm text-slate-700">สแกน Label หน้างาน</h3>
+            <p class="text-[11px] text-slate-400">ส่องกล้องปุ๊บ แยก Part & Lot ปั๊บ</p>
+          </div>
+        </div>
+        
+        <button id="btnToggleScan" type="button" class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-semibold px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm transition">
+          <i data-lucide="camera" class="w-4 h-4"></i>
+          <span id="scanBtnText">เปิดกล้องสแกน</span>
+        </button>
+      </div>
+
+      <!-- Live Video Viewer -->
+      <div id="scannerContainer" class="hidden mt-3 relative overflow-hidden rounded-xl border-2 border-blue-500 bg-black aspect-square max-h-72 mx-auto">
+        <video id="liveVideo" class="w-full h-full object-cover" playsinline autoplay muted></video>
+        <canvas id="qrCanvas" class="hidden"></canvas>
+        <div class="absolute inset-0 border-2 border-dashed border-emerald-400 m-8 rounded-lg pointer-events-none flex items-center justify-center">
+          <span class="text-[11px] bg-black/60 text-white px-2 py-1 rounded">วาง QR Code ในกรอบนี้</span>
+        </div>
+      </div>
+
+      <!-- Scan Badge Success -->
+      <div id="scanBadge" class="hidden mt-3 p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs flex items-center gap-2">
+        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0"></i>
+        <span id="scanBadgeText">สแกนสำเร็จ: แยกข้อมูลลงช่องแล้ว</span>
+      </div>
+    </div>
+
+    <!-- Form Start -->
+    <form id="cncAuditForm" class="space-y-3">
+
+      <!-- Section 1: ข้อมูลทั่วไป -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
+        <div class="flex items-center gap-2 border-b pb-2">
+          <i data-lucide="file-text" class="w-4 h-4 text-blue-600"></i>
+          <span class="font-semibold text-xs text-slate-600 uppercase tracking-wider">ข้อมูลพื้นฐาน</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2.5">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Audit Type *</label>
+            <select id="auditType" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs outline-none">
+              <option value="Repair">Repair</option>
+              <option value="Plan">Plan</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">รหัสช่าง Technician *</label>
+            <input type="number" id="techId" required placeholder="เช่น 1356" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Part No. *</label>
+          <input type="text" id="partNo" required placeholder="เช่น 3703-K350-0000" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-mono font-medium text-blue-900 outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Lot No. *</label>
+          <input type="text" id="lotNo" required placeholder="เช่น K10-2605-014" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-mono font-medium text-blue-900 outline-none">
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Technician Finish Time *</label>
+          <input type="time" id="finishTime" required class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs outline-none">
+        </div>
+      </div>
+
+      <!-- Section 2: ข้อ 10 คำนวณชิ้นงาน Re-setting อัตโนมัติ -->
+      <div class="bg-blue-50 border border-blue-200 rounded-2xl p-4 shadow-sm space-y-3">
+        <div class="flex items-center justify-between border-b border-blue-200 pb-2">
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="calculator" class="w-4 h-4 text-blue-600"></i>
+            <span class="font-bold text-xs text-blue-900">ข้อ 10. ทวนสอบจำนวนงาน Setting</span>
+          </div>
+          <span class="text-[10px] bg-blue-200 text-blue-800 px-2 py-0.5 rounded-full font-semibold">Auto Calculate</span>
+        </div>
+
+        <!-- 10.1 & 10.2 -->
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="bg-white p-2.5 rounded-xl border border-blue-100 flex items-center justify-between">
+            <span class="text-slate-600">10.1 Clear Count = 0</span>
+            <input type="checkbox" id="c10_1" checked class="w-4 h-4 text-blue-600 rounded">
+          </div>
+          <div class="bg-white p-2.5 rounded-xl border border-blue-100 flex items-center justify-between">
+            <span class="text-slate-600">10.2 Preset = 10</span>
+            <input type="checkbox" id="c10_2" checked class="w-4 h-4 text-blue-600 rounded">
+          </div>
+        </div>
+
+        <!-- 10.3 ในตะกร้า -->
+        <div class="bg-white p-3 rounded-xl border border-blue-100 space-y-2">
+          <span class="text-xs font-semibold text-slate-700">10.3 ชิ้นงานในตะกร้า (ตัว)</span>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[11px] text-slate-500 mb-0.5">งานผ่า</label>
+              <input type="number" id="basketCut" value="0" min="0" class="count-input w-full bg-slate-50 border rounded-lg p-2 text-xs font-bold text-center">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500 mb-0.5">งานเต็ม</label>
+              <input type="number" id="basketFull" value="0" min="0" class="count-input w-full bg-slate-50 border rounded-lg p-2 text-xs font-bold text-center">
+            </div>
+          </div>
+        </div>
+
+        <!-- 10.4 หน้าบอร์ด -->
+        <div class="bg-white p-3 rounded-xl border border-blue-100 space-y-2">
+          <span class="text-xs font-semibold text-slate-700">10.4 ชิ้นงานช่อง Technician บอร์ดหน้างาน (ตัว)</span>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[11px] text-slate-500 mb-0.5">งานผ่า</label>
+              <input type="number" id="boardCut" value="0" min="0" class="count-input w-full bg-slate-50 border rounded-lg p-2 text-xs font-bold text-center">
+            </div>
+            <div>
+              <label class="block text-[11px] text-slate-500 mb-0.5">งานเต็ม</label>
+              <input type="number" id="boardFull" value="0" min="0" class="count-input w-full bg-slate-50 border rounded-lg p-2 text-xs font-bold text-center">
+            </div>
+          </div>
+        </div>
+
+        <!-- ผลรวม 10.5 vs 10.6 -->
+        <div class="bg-white p-3 rounded-xl border border-blue-200 grid grid-cols-2 gap-3 text-center">
+          <div class="bg-slate-50 p-2 rounded-lg border">
+            <span class="block text-[11px] text-slate-500">10.5 ยอดนับจริง (A)</span>
+            <span id="totalA" class="font-extrabold text-base text-blue-600">0</span> <span class="text-[11px] text-slate-400">Pcs.</span>
+          </div>
+          <div>
+            <label class="block text-[11px] text-slate-500 mb-0.5">10.6 Monitor Count (B)</label>
+            <input type="number" id="monitorB" value="0" min="0" class="w-full bg-slate-50 border rounded-lg p-1.5 text-base font-extrabold text-center text-blue-900 outline-none">
+          </div>
+        </div>
+
+        <!-- 10.7 ผลเปรียบเทียบ -->
+        <div id="verifyResultBadge" class="p-2.5 rounded-xl text-xs font-semibold flex items-center justify-between bg-emerald-100 text-emerald-800 border border-emerald-300">
+          <span>10.7 ผลการทวนสอบ (A vs B):</span>
+          <span id="verifyText" class="font-bold">เท่ากัน</span>
+        </div>
+
+        <!-- 10.8 ทิ้งงาน -->
+        <div class="bg-white p-2.5 rounded-xl border border-blue-100 flex items-center justify-between text-xs">
+          <span class="text-slate-700 font-medium">ทิ้งงานเมื่อทวนสอบเรียบร้อย *</span>
+          <select id="discardStatus" class="bg-slate-50 border border-slate-300 rounded-lg p-1.5 text-xs font-semibold outline-none">
+            <option value="ทิ้งงานแล้ว">ทิ้งงานแล้ว</option>
+            <option value="ยังไม่ทิ้งงาน">ยังไม่ทิ้งงาน</option>
+          </select>
+        </div>
+
+        <!-- กล่องพิเศษหากยอดไม่เท่ากัน -->
+        <div id="notEqualBox" class="hidden bg-amber-50 border border-amber-300 p-3 rounded-xl space-y-2 text-xs">
+          <span class="font-bold text-amber-800 flex items-center gap-1">
+            <i data-lucide="alert-triangle" class="w-4 h-4"></i> กรณีจำนวนชิ้นงานไม่เท่ากัน
+          </span>
+          <input type="text" id="notEqualReason" placeholder="ระบุสาเหตุของงานไม่เท่า *" class="w-full bg-white border border-amber-300 rounded-lg p-2 text-xs">
+          <div class="grid grid-cols-2 gap-2">
+            <select id="notEqualDiscard" class="bg-white border border-amber-300 rounded-lg p-1.5 text-xs">
+              <option value="ทิ้งงานแล้ว">ทิ้งงานแล้ว</option>
+              <option value="ยังไม่ทิ้งงาน">ยังไม่ทิ้งงาน</option>
+            </select>
+            <input type="number" id="notEqualAuditor" placeholder="รหัส Auditor *" class="bg-white border border-amber-300 rounded-lg p-1.5 text-xs">
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: ข้อ 1 ถึง 9 -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
+        <div class="flex items-center justify-between border-b pb-2">
+          <span class="font-semibold text-xs text-slate-600 uppercase tracking-wider">ข้อกำหนด 1 ถึง 9</span>
+          <button type="button" id="btnCheckAllStd" class="text-xs text-blue-600 font-medium flex items-center gap-1">
+            <i data-lucide="check-check" class="w-3.5 h-3.5"></i> เลือกค่าปกติทั้งหมด
+          </button>
+        </div>
+
+        <div class="space-y-2 text-xs">
+          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 space-y-1.5">
+            <span class="font-semibold text-slate-700 block">1. ตรวจสอบอุปกรณ์รับงาน (ต้องไม่มีชิ้นงานค้าง)</span>
+            <div class="grid grid-cols-2 gap-1.5 text-[11px]">
+              <label class="flex items-center justify-between bg-white p-1.5 rounded border">
+                <span>1.1 ท่อรับงาน</span>
+                <select id="c1_1" class="border rounded px-1 py-0.5 text-xs font-bold text-emerald-600"><option value="-">-</option><option value="ไม่มี">ไม่มี</option></select>
+              </label>
+              <label class="flex items-center justify-between bg-white p-1.5 rounded border">
+                <span>1.2 ตะกร้ารับงาน</span>
+                <select id="c1_2" class="border rounded px-1 py-0.5 text-xs font-bold text-emerald-600"><option value="ไม่มี">ไม่มี</option><option value="-">-</option></select>
+              </label>
+              <label class="flex items-center justify-between bg-white p-1.5 rounded border">
+                <span>1.3 Separetor</span>
+                <select id="c1_3" class="border rounded px-1 py-0.5 text-xs font-bold text-emerald-600"><option value="ไม่มี">ไม่มี</option><option value="-">-</option></select>
+              </label>
+              <label class="flex items-center justify-between bg-white p-1.5 rounded border">
+                <span>1.4 Conveyer</span>
+                <select id="c1_4" class="border rounded px-1 py-0.5 text-xs font-bold text-emerald-600"><option value="ไม่มี">ไม่มี</option><option value="-">-</option></select>
+              </label>
+              <label class="flex items-center justify-between bg-white p-1.5 rounded border">
+                <span>1.5 Rotary Table</span>
+                <select id="c1_5" class="border rounded px-1 py-0.5 text-xs font-bold text-emerald-600"><option value="-">-</option><option value="ไม่มี">ไม่มี</option></select>
+              </label>
+              <label class="flex items-center justify-between bg-white p-1.5 rounded border">
+                <span>1.6 Back Chuck</span>
+                <select id="c1_6" class="border rounded px-1 py-0.5 text-xs font-bold text-emerald-600"><option value="ไม่มี">ไม่มี</option><option value="-">-</option></select>
+              </label>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-1.5">
+            <label class="flex items-center justify-between bg-slate-50 p-2 rounded-xl border">
+              <span>2. สาย Cutting oil ฉีดตรงชิ้นงาน</span>
+              <select id="c2" class="border rounded px-2 py-1 font-bold text-emerald-600"><option value="ตรง">ตรง</option><option value="ไม่ตรง">ไม่ตรง</option></select>
+            </label>
+            <label class="flex items-center justify-between bg-slate-50 p-2 rounded-xl border">
+              <span>3. ลง Info ใน Lot Control</span>
+              <select id="c3" class="border rounded px-2 py-1 font-bold text-emerald-600"><option value="มี">มี</option><option value="ไม่มี">ไม่มี</option></select>
+            </label>
+            <label class="flex items-center justify-between bg-slate-50 p-2 rounded-xl border">
+              <span>4. Spec ในใบ Inspection ถูกต้อง</span>
+              <select id="c4" class="border rounded px-2 py-1 font-bold text-emerald-600"><option value="ถูกต้อง">ถูกต้อง</option><option value="ไม่ถูกต้อง">ไม่ถูกต้อง</option></select>
+            </label>
+            <label class="flex items-center justify-between bg-slate-50 p-2 rounded-xl border">
+              <span>5. แยก Lot No. ก่อน/หลังแก้ไข</span>
+              <select id="c5" class="border rounded px-2 py-1 font-bold text-emerald-600"><option value="แยก">แยก</option><option value="ไม่แยก">ไม่แยก</option></select>
+            </label>
+            <label class="flex items-center justify-between bg-slate-50 p-2 rounded-xl border">
+              <span>6. Tool No./Life ตรง Layout</span>
+              <select id="c6" class="border rounded px-2 py-1 font-bold text-emerald-600"><option value="ตรง">ตรง</option><option value="ไม่ตรง">ไม่ตรง</option></select>
+            </label>
+            <label class="flex items-center justify-between bg-slate-50 p-2 rounded-xl border">
+              <span>7. เช็คแรงดัน Bar ตรงป้ายกำหนด</span>
+              <select id="c7" class="border rounded px-2 py-1 font-bold text-emerald-600"><option value="ตรง">ตรง</option><option value="ไม่ตรง">ไม่ตรง</option></select>
+            </label>
+            <label class="flex items-center justify-between bg-slate-50 p-2 rounded-xl border">
+              <span>8. รับงาน 100% (ออกครบ 3 ตัว)</span>
+              <select id="c8" class="border rounded px-2 py-1 font-bold text-emerald-600"><option value="ครบ">ครบ</option><option value="ไม่ครบ">ไม่ครบ</option></select>
+            </label>
+            <label class="flex items-center justify-between bg-slate-50 p-2 rounded-xl border">
+              <span>9. Cover ปุ่ม Block skip มีปิด</span>
+              <select id="c9" class="border rounded px-2 py-1 font-bold text-emerald-600"><option value="-">-</option><option value="มี">มี</option><option value="ไม่มี">ไม่มี</option></select>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: ผู้ตรวจ Audit -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-2.5">
+        <label class="block text-xs font-medium text-slate-600 mb-1">รหัสหัวหน้างาน Audit *</label>
+        <input type="number" id="auditorId" required placeholder="เช่น 1294" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs outline-none">
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" id="btnSubmit" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-bold py-3.5 px-4 rounded-2xl shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 transition text-sm">
+        <i data-lucide="send" class="w-4 h-4"></i>
+        <span>บันทึกข้อมูลเข้า Google Sheets</span>
+      </button>
+
+    </form>
+  </main>
+
+  <script>
+    lucide.createIcons();
+
+    // Web App URL สำหรับส่งข้อมูลเข้า Google Sheets (URL ที่คุณ Deploy ไว้)
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz7o5gWLlzjNaSGTsMlPScpIXgcOUv_k4u8U2KhjmvVuGnHbHNRs8TR34T4p7DD1RQj/exec";
+
+    // 1. ระบบกล้องสด WebRTC Direct (ทำงานได้ 100% บน GitHub Pages HTTPS)
+    const video = document.getElementById("liveVideo");
+    const canvasElement = document.getElementById("qrCanvas");
+    const canvas = canvasElement.getContext("2d");
+    const container = document.getElementById("scannerContainer");
+    const btnText = document.getElementById("scanBtnText");
+
+    let stream = null;
+    let isScanning = false;
+    let animationId = null;
+
+    document.getElementById("btnToggleScan").addEventListener("click", async () => {
+      if (!isScanning) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { ideal: "environment" }, width: { ideal: 640 }, height: { ideal: 640 } }
+          });
+          video.srcObject = stream;
+          video.setAttribute("playsinline", true);
+          await video.play();
+
+          container.classList.remove("hidden");
+          btnText.innerText = "ปิดกล้อง";
+          isScanning = true;
+          requestAnimationFrame(scanQRCodeLoop);
+        } catch (err) {
+          alert("ไม่สามารถเปิดกล้องได้: " + err.message);
+        }
+      } else {
+        stopScanner();
+      }
+    });
+
+    function stopScanner() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+      if (animationId) cancelAnimationFrame(animationId);
+      container.classList.add("hidden");
+      btnText.innerText = "เปิดกล้องสแกน";
+      isScanning = false;
+    }
+
+    function scanQRCodeLoop() {
+      if (video.readyState === video.HAVE_ENOUGH_DATA && isScanning) {
+        canvasElement.height = video.videoHeight;
+        canvasElement.width = video.videoWidth;
+        canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+        
+        const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
+        });
+
+        if (code && code.data) {
+          handleScannedQR(code.data);
+          stopScanner();
+          return;
+        }
+      }
+      if (isScanning) {
+        animationId = requestAnimationFrame(scanQRCodeLoop);
+      }
+    }
+
+    // ตัวอย่าง QR Code: 3703-K350-0000,K10-2605-014,0,LA
+    function handleScannedQR(text) {
+      const parts = text.split(",");
+      if (parts.length >= 2) {
+        document.getElementById("partNo").value = parts[0].trim();
+        document.getElementById("lotNo").value = parts[1].trim();
+      } else {
+        document.getElementById("lotNo").value = text.trim();
+      }
+      const badge = document.getElementById("scanBadge");
+      badge.classList.remove("hidden");
+      document.getElementById("scanBadgeText").innerText = "สแกนสำเร็จ: Part=" + document.getElementById("partNo").value + " | Lot=" + document.getElementById("lotNo").value;
+      navigator.vibrate && navigator.vibrate(100);
+    }
+
+    // 2. คำนวณยอดชิ้นงาน Re-setting อัตโนมัติ
+    function calcTotalSetting() {
+      const bCut = Number(document.getElementById("basketCut").value) || 0;
+      const bFull = Number(document.getElementById("basketFull").value) || 0;
+      const bdCut = Number(document.getElementById("boardCut").value) || 0;
+      const bdFull = Number(document.getElementById("boardFull").value) || 0;
+      
+      const totalA = bCut + bFull + bdCut + bdFull;
+      document.getElementById("totalA").innerText = totalA;
+
+      const monitorB = Number(document.getElementById("monitorB").value) || 0;
+      const verifyBadge = document.getElementById("verifyResultBadge");
+      const verifyText = document.getElementById("verifyText");
+      const notEqualBox = document.getElementById("notEqualBox");
+
+      if (totalA === monitorB) {
+        verifyBadge.className = "p-2.5 rounded-xl text-xs font-semibold flex items-center justify-between bg-emerald-100 text-emerald-800 border border-emerald-300";
+        verifyText.innerText = "เท่ากัน";
+        notEqualBox.classList.add("hidden");
+      } else {
+        verifyBadge.className = "p-2.5 rounded-xl text-xs font-semibold flex items-center justify-between bg-rose-100 text-rose-800 border border-rose-300";
+        verifyText.innerText = "ไม่เท่ากัน";
+        notEqualBox.classList.remove("hidden");
+      }
+    }
+
+    document.querySelectorAll(".count-input, #monitorB").forEach(el => {
+      el.addEventListener("input", calcTotalSetting);
+    });
+
+    document.getElementById("btnCheckAllStd").addEventListener("click", () => {
+      document.getElementById("c1_1").value = "-";
+      document.getElementById("c1_2").value = "ไม่มี";
+      document.getElementById("c1_3").value = "ไม่มี";
+      document.getElementById("c1_4").value = "ไม่มี";
+      document.getElementById("c1_5").value = "-";
+      document.getElementById("c1_6").value = "ไม่มี";
+      document.getElementById("c2").value = "ตรง";
+      document.getElementById("c3").value = "มี";
+      document.getElementById("c4").value = "ถูกต้อง";
+      document.getElementById("c5").value = "แยก";
+      document.getElementById("c6").value = "ตรง";
+      document.getElementById("c7").value = "ตรง";
+      document.getElementById("c8").value = "ครบ";
+      document.getElementById("c9").value = "-";
+    });
+
+    // 3. Submit Form ส่งข้อมูลข้ามโดเมนเข้า Google Sheets (CORS Safe)
+    document.getElementById("cncAuditForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const btn = document.getElementById("btnSubmit");
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> บันทึกข้อมูล...`;
+      lucide.createIcons();
+
+      const bCut = Number(document.getElementById("basketCut").value) || 0;
+      const bFull = Number(document.getElementById("basketFull").value) || 0;
+      const bdCut = Number(document.getElementById("boardCut").value) || 0;
+      const bdFull = Number(document.getElementById("boardFull").value) || 0;
+      const totalBoard = bdCut + bdFull;
+      const totalA = bCut + bFull + totalBoard;
+      const monitorB = Number(document.getElementById("monitorB").value) || 0;
+      const isEqual = totalA === monitorB;
+
+      const payload = {
+        auditType: document.getElementById("auditType").value,
+        techId: document.getElementById("techId").value,
+        partNo: document.getElementById("partNo").value,
+        lotNo: document.getElementById("lotNo").value,
+        finishTime: document.getElementById("finishTime").value,
+        c1_1: document.getElementById("c1_1").value,
+        c1_2: document.getElementById("c1_2").value,
+        c1_3: document.getElementById("c1_3").value,
+        c1_4: document.getElementById("c1_4").value,
+        c1_5: document.getElementById("c1_5").value,
+        c1_6: document.getElementById("c1_6").value,
+        c2: document.getElementById("c2").value,
+        c3: document.getElementById("c3").value,
+        c4: document.getElementById("c4").value,
+        c5: document.getElementById("c5").value,
+        c6: document.getElementById("c6").value,
+        c7: document.getElementById("c7").value,
+        c8: document.getElementById("c8").value,
+        c9: document.getElementById("c9").value,
+        c10_1: document.getElementById("c10_1").checked ? "✔" : "-",
+        c10_2: document.getElementById("c10_2").checked ? "✔" : "-",
+        basketCut: bCut,
+        basketFull: bFull,
+        boardCut: bdCut,
+        boardFull: bdFull,
+        boardTotal: totalBoard,
+        totalA: totalA,
+        monitorB: monitorB,
+        verifyResult: isEqual ? "เท่ากัน" : "ไม่เท่ากัน",
+        discardStatus: document.getElementById("discardStatus").value,
+        auditorId: document.getElementById("auditorId").value,
+        notEqualReason: !isEqual ? document.getElementById("notEqualReason").value : "",
+        notEqualDiscard: !isEqual ? document.getElementById("notEqualDiscard").value : "",
+        notEqualAuditor: !isEqual ? document.getElementById("notEqualAuditor").value : ""
+      };
+
+      fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+      .then(() => {
+        alert("บันทึกข้อมูลเข้า Google Sheets สำเร็จเรียบร้อย!");
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="send" class="w-4 h-4"></i> บันทึกข้อมูลเข้า Google Sheets`;
+        lucide.createIcons();
+        document.getElementById("cncAuditForm").reset();
+        document.getElementById("scanBadge").classList.add("hidden");
+      })
+      .catch(err => {
+        alert("เกิดข้อผิดพลาด: " + err);
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="send" class="w-4 h-4"></i> บันทึกข้อมูลเข้า Google Sheets`;
+        lucide.createIcons();
+      });
+    });
+  </script>
+</body>
+</html>
