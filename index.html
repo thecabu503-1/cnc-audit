@@ -23,7 +23,7 @@
         <p class="text-xs text-blue-200">E&H Precision (Thailand)</p>
       </div>
     </div>
-    <span class="text-xs bg-blue-800 border border-blue-600 px-2 py-1 rounded-md text-blue-100">Live Scanner</span>
+    <span class="text-xs bg-blue-800 border border-blue-600 px-2 py-1 rounded-md text-blue-100">Live Scanner v2.1</span>
   </header>
 
   <main class="max-w-lg mx-auto p-3 space-y-3">
@@ -34,8 +34,8 @@
         <div class="flex items-center gap-2">
           <i data-lucide="qr-code" class="w-5 h-5 text-blue-600"></i>
           <div>
-            <h3 class="font-semibold text-sm text-slate-700">สแกน Label หน้างาน</h3>
-            <p class="text-[11px] text-slate-400">ส่องกล้องปุ๊บ แยก Part & Lot ปั๊บ</p>
+            <h3 class="font-semibold text-sm text-slate-700">สแกน Label หน้างาน (ถ้ามี)</h3>
+            <p class="text-[11px] text-slate-400">สแกนแยกอัตโนมัติ หรือพิมพ์/แก้ไขเองด้านล่างได้</p>
           </div>
         </div>
         
@@ -81,18 +81,41 @@
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-600 mb-1">รหัสช่าง Technician *</label>
-            <input type="number" id="techId" required placeholder="เช่น 1356" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs outline-none">
+            <div class="relative flex items-center">
+              <input type="text" inputmode="text" id="techId" required autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="เช่น 1356, V11804" class="w-full bg-white border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl p-2.5 pr-10 text-xs font-medium uppercase outline-none transition">
+              <button type="button" id="btnPrefixV" title="เติม/เอาออก รหัสซับ V" class="absolute right-1.5 bg-blue-50 hover:bg-blue-100 active:scale-95 text-blue-700 border border-blue-200 font-bold text-[10px] px-2 py-1 rounded-lg transition">+V</button>
+            </div>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-slate-600 mb-1">Part No. *</label>
-          <input type="text" id="partNo" required placeholder="เช่น 3703-K350-0000" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-mono font-medium text-blue-900 outline-none">
+          <div class="flex items-center justify-between mb-1">
+            <label for="partNo" class="block text-xs font-medium text-slate-600">Part No.</label>
+            <span class="text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
+              <i data-lucide="pencil" class="w-2.5 h-2.5"></i> พิมพ์/แก้ไขเองได้
+            </span>
+          </div>
+          <div class="relative flex items-center">
+            <input type="text" id="partNo" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="สแกน QR หรือพิมพ์เอง เช่น 3703-K350-0000" class="w-full bg-white border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl p-2.5 pr-8 text-xs font-mono font-medium text-blue-900 outline-none transition">
+            <button type="button" id="btnClearPart" title="ล้างข้อมูลช่อง Part No." class="hidden absolute right-2 text-slate-400 hover:text-slate-600 p-1">
+              <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
         </div>
 
         <div>
-          <label class="block text-xs font-medium text-slate-600 mb-1">Lot No. *</label>
-          <input type="text" id="lotNo" required placeholder="เช่น K10-2605-014" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-mono font-medium text-blue-900 outline-none">
+          <div class="flex items-center justify-between mb-1">
+            <label for="lotNo" class="block text-xs font-medium text-slate-600">Lot No.</label>
+            <span class="text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-medium flex items-center gap-1">
+              <i data-lucide="pencil" class="w-2.5 h-2.5"></i> พิมพ์/แก้ไขเองได้
+            </span>
+          </div>
+          <div class="relative flex items-center">
+            <input type="text" id="lotNo" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="สแกน QR หรือพิมพ์เอง เช่น K10-2605-014" class="w-full bg-white border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl p-2.5 pr-8 text-xs font-mono font-medium text-blue-900 outline-none transition">
+            <button type="button" id="btnClearLot" title="ล้างข้อมูลช่อง Lot No." class="hidden absolute right-2 text-slate-400 hover:text-slate-600 p-1">
+              <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
         </div>
 
         <div>
@@ -191,7 +214,7 @@
               <option value="ทิ้งงานแล้ว">ทิ้งงานแล้ว</option>
               <option value="ยังไม่ทิ้งงาน">ยังไม่ทิ้งงาน</option>
             </select>
-            <input type="number" id="notEqualAuditor" placeholder="รหัส Auditor *" class="bg-white border border-amber-300 rounded-lg p-1.5 text-xs">
+            <input type="text" inputmode="text" id="notEqualAuditor" autocapitalize="characters" autocomplete="off" placeholder="รหัส Auditor *" class="bg-white border border-amber-300 rounded-lg p-1.5 text-xs uppercase">
           </div>
         </div>
       </div>
@@ -276,7 +299,7 @@
       <!-- Section 4: ผู้ตรวจ Audit -->
       <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-2.5">
         <label class="block text-xs font-medium text-slate-600 mb-1">รหัสหัวหน้างาน Audit *</label>
-        <input type="number" id="auditorId" required placeholder="เช่น 1294" class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs outline-none">
+        <input type="text" inputmode="text" id="auditorId" required autocapitalize="characters" autocomplete="off" placeholder="เช่น 1294, D020" class="w-full bg-white border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl p-2.5 text-xs uppercase outline-none transition">
       </div>
 
       <!-- Submit Button -->
@@ -360,18 +383,89 @@
       }
     }
 
+    // ตัวช่วยช่อง Technician (พิมพ์ตัวเลข หรือ V นำหน้า เช่น V11804 ได้)
+    const techIdInput = document.getElementById("techId");
+    const btnPrefixV = document.getElementById("btnPrefixV");
+
+    function updatePrefixVBtnStyle() {
+      const hasV = techIdInput.value.toUpperCase().startsWith("V");
+      btnPrefixV.className = hasV
+        ? "absolute right-1.5 bg-blue-600 text-white border border-blue-600 font-bold text-[10px] px-2 py-1 rounded-lg transition active:scale-95"
+        : "absolute right-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-bold text-[10px] px-2 py-1 rounded-lg transition active:scale-95";
+      btnPrefixV.innerText = hasV ? "V✓" : "+V";
+    }
+
+    techIdInput.addEventListener("input", (e) => {
+      if (e.isComposing) return;
+      const cleaned = techIdInput.value.toUpperCase().replace(/[^A-Z0-9-]/g, "");
+      if (techIdInput.value !== cleaned) {
+        const pos = techIdInput.selectionStart;
+        techIdInput.value = cleaned;
+        if (pos !== null) techIdInput.setSelectionRange(pos, pos);
+      }
+      updatePrefixVBtnStyle();
+    });
+
+    btnPrefixV.addEventListener("click", () => {
+      const val = techIdInput.value.trim().toUpperCase();
+      if (val.startsWith("V")) {
+        techIdInput.value = val.slice(1);
+      } else {
+        techIdInput.value = "V" + val;
+      }
+      updatePrefixVBtnStyle();
+      techIdInput.focus();
+    });
+
+    // ตัวช่วยช่อง Part No. และ Lot No. (พิมพ์/แก้ไขเองได้ตลอดเวลา + ปุ่มล้างค่า)
+    const partNoInput = document.getElementById("partNo");
+    const lotNoInput = document.getElementById("lotNo");
+    const btnClearPart = document.getElementById("btnClearPart");
+    const btnClearLot = document.getElementById("btnClearLot");
+
+    function syncClearButtons() {
+      btnClearPart.classList.toggle("hidden", !partNoInput.value);
+      btnClearLot.classList.toggle("hidden", !lotNoInput.value);
+    }
+
+    [partNoInput, lotNoInput].forEach(el => {
+      el.addEventListener("input", (e) => {
+        if (e.isComposing) return;
+        const upper = el.value.toUpperCase();
+        if (el.value !== upper) {
+          const pos = el.selectionStart;
+          el.value = upper;
+          if (pos !== null) el.setSelectionRange(pos, pos);
+        }
+        syncClearButtons();
+      });
+    });
+
+    btnClearPart.addEventListener("click", () => {
+      partNoInput.value = "";
+      syncClearButtons();
+      partNoInput.focus();
+    });
+
+    btnClearLot.addEventListener("click", () => {
+      lotNoInput.value = "";
+      syncClearButtons();
+      lotNoInput.focus();
+    });
+
     // ตัวอย่าง QR Code: 3703-K350-0000,K10-2605-014,0,LA
     function handleScannedQR(text) {
       const parts = text.split(",");
       if (parts.length >= 2) {
-        document.getElementById("partNo").value = parts[0].trim();
-        document.getElementById("lotNo").value = parts[1].trim();
+        partNoInput.value = parts[0].trim().toUpperCase();
+        lotNoInput.value = parts[1].trim().toUpperCase();
       } else {
-        document.getElementById("lotNo").value = text.trim();
+        lotNoInput.value = text.trim().toUpperCase();
       }
+      syncClearButtons();
       const badge = document.getElementById("scanBadge");
       badge.classList.remove("hidden");
-      document.getElementById("scanBadgeText").innerText = "สแกนสำเร็จ: Part=" + document.getElementById("partNo").value + " | Lot=" + document.getElementById("lotNo").value;
+      document.getElementById("scanBadgeText").innerText = "สแกนสำเร็จ (แก้ไขต่อได้): Part=" + partNoInput.value + " | Lot=" + lotNoInput.value;
       navigator.vibrate && navigator.vibrate(100);
     }
 
@@ -425,6 +519,14 @@
     // 3. Submit Form ส่งข้อมูลข้ามโดเมนเข้า Google Sheets (CORS Safe)
     document.getElementById("cncAuditForm").addEventListener("submit", function(e) {
       e.preventDefault();
+
+      const partVal = partNoInput.value.trim();
+      const lotVal = lotNoInput.value.trim();
+      if (!partVal || !lotVal) {
+        const ok = confirm("ยังไม่ได้กรอก Part No. หรือ Lot No. ให้ครบ\nต้องการบันทึกข้อมูลโดยเว้นว่างไว้หรือไม่?");
+        if (!ok) return;
+      }
+
       const btn = document.getElementById("btnSubmit");
       btn.disabled = true;
       btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> บันทึกข้อมูล...`;
@@ -441,9 +543,9 @@
 
       const payload = {
         auditType: document.getElementById("auditType").value,
-        techId: document.getElementById("techId").value,
-        partNo: document.getElementById("partNo").value,
-        lotNo: document.getElementById("lotNo").value,
+        techId: techIdInput.value.trim().toUpperCase(),
+        partNo: partVal,
+        lotNo: lotVal,
         finishTime: document.getElementById("finishTime").value,
         c1_1: document.getElementById("c1_1").value,
         c1_2: document.getElementById("c1_2").value,
@@ -470,10 +572,10 @@
         monitorB: monitorB,
         verifyResult: isEqual ? "เท่ากัน" : "ไม่เท่ากัน",
         discardStatus: document.getElementById("discardStatus").value,
-        auditorId: document.getElementById("auditorId").value,
+        auditorId: document.getElementById("auditorId").value.trim().toUpperCase(),
         notEqualReason: !isEqual ? document.getElementById("notEqualReason").value : "",
         notEqualDiscard: !isEqual ? document.getElementById("notEqualDiscard").value : "",
-        notEqualAuditor: !isEqual ? document.getElementById("notEqualAuditor").value : ""
+        notEqualAuditor: !isEqual ? document.getElementById("notEqualAuditor").value.trim().toUpperCase() : ""
       };
 
       fetch(APPS_SCRIPT_URL, {
@@ -489,6 +591,9 @@
         lucide.createIcons();
         document.getElementById("cncAuditForm").reset();
         document.getElementById("scanBadge").classList.add("hidden");
+        updatePrefixVBtnStyle();
+        syncClearButtons();
+        calcTotalSetting();
       })
       .catch(err => {
         alert("เกิดข้อผิดพลาด: " + err);
