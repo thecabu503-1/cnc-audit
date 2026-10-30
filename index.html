@@ -23,7 +23,7 @@
         <p class="text-xs text-blue-200">E&H Precision (Thailand)</p>
       </div>
     </div>
-    <span class="text-xs bg-blue-800 border border-blue-600 px-2 py-1 rounded-md text-blue-100">Live Scanner v2.1</span>
+    <span class="text-xs bg-blue-800 border border-blue-600 px-2 py-1 rounded-md text-blue-100">Live Scanner v2.2</span>
   </header>
 
   <main class="max-w-lg mx-auto p-3 space-y-3">
@@ -80,10 +80,10 @@
             </select>
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-600 mb-1">รหัสช่าง Technician *</label>
+            <label for="techId" class="block text-xs font-medium text-slate-600 mb-1">รหัสช่าง Technician *</label>
             <div class="relative flex items-center">
-              <input type="text" inputmode="text" id="techId" required autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="เช่น 1356, V11804" class="w-full bg-white border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl p-2.5 pr-10 text-xs font-medium uppercase outline-none transition">
-              <button type="button" id="btnPrefixV" title="เติม/เอาออก รหัสซับ V" class="absolute right-1.5 bg-blue-50 hover:bg-blue-100 active:scale-95 text-blue-700 border border-blue-200 font-bold text-[10px] px-2 py-1 rounded-lg transition">+V</button>
+              <input type="text" id="techId" required placeholder="เช่น 1356 หรือ V11804" class="w-full bg-white border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl p-2.5 pr-10 text-xs font-medium outline-none transition">
+              <button type="button" id="btnPrefixV" title="กดเติมตัว V นำหน้า" class="absolute right-1.5 bg-blue-50 hover:bg-blue-100 active:scale-95 text-blue-700 border border-blue-200 font-bold text-[10px] px-2 py-1 rounded-lg transition">+V</button>
             </div>
           </div>
         </div>
@@ -96,7 +96,7 @@
             </span>
           </div>
           <div class="relative flex items-center">
-            <input type="text" id="partNo" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="สแกน QR หรือพิมพ์เอง เช่น 3703-K350-0000" class="w-full bg-white border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl p-2.5 pr-8 text-xs font-mono font-medium text-blue-900 outline-none transition">
+            <input type="text" id="partNo" placeholder="สแกน QR หรือพิมพ์เอง เช่น 3703-K350-0000" class="w-full bg-white border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl p-2.5 pr-8 text-xs font-mono font-medium text-blue-900 outline-none transition">
             <button type="button" id="btnClearPart" title="ล้างข้อมูลช่อง Part No." class="hidden absolute right-2 text-slate-400 hover:text-slate-600 p-1">
               <i data-lucide="x" class="w-3.5 h-3.5"></i>
             </button>
@@ -111,7 +111,7 @@
             </span>
           </div>
           <div class="relative flex items-center">
-            <input type="text" id="lotNo" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="สแกน QR หรือพิมพ์เอง เช่น K10-2605-014" class="w-full bg-white border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl p-2.5 pr-8 text-xs font-mono font-medium text-blue-900 outline-none transition">
+            <input type="text" id="lotNo" placeholder="สแกน QR หรือพิมพ์เอง เช่น K10-2605-014" class="w-full bg-white border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl p-2.5 pr-8 text-xs font-mono font-medium text-blue-900 outline-none transition">
             <button type="button" id="btnClearLot" title="ล้างข้อมูลช่อง Lot No." class="hidden absolute right-2 text-slate-400 hover:text-slate-600 p-1">
               <i data-lucide="x" class="w-3.5 h-3.5"></i>
             </button>
@@ -214,7 +214,7 @@
               <option value="ทิ้งงานแล้ว">ทิ้งงานแล้ว</option>
               <option value="ยังไม่ทิ้งงาน">ยังไม่ทิ้งงาน</option>
             </select>
-            <input type="text" inputmode="text" id="notEqualAuditor" autocapitalize="characters" autocomplete="off" placeholder="รหัส Auditor *" class="bg-white border border-amber-300 rounded-lg p-1.5 text-xs uppercase">
+            <input type="text" id="notEqualAuditor" placeholder="รหัส Auditor *" class="bg-white border border-amber-300 rounded-lg p-1.5 text-xs">
           </div>
         </div>
       </div>
@@ -299,7 +299,7 @@
       <!-- Section 4: ผู้ตรวจ Audit -->
       <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-2.5">
         <label class="block text-xs font-medium text-slate-600 mb-1">รหัสหัวหน้างาน Audit *</label>
-        <input type="text" inputmode="text" id="auditorId" required autocapitalize="characters" autocomplete="off" placeholder="เช่น 1294, D020" class="w-full bg-white border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl p-2.5 text-xs uppercase outline-none transition">
+        <input type="text" id="auditorId" required placeholder="เช่น 1294 หรือ D020" class="w-full bg-white border border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-xl p-2.5 text-xs outline-none transition">
       </div>
 
       <!-- Submit Button -->
@@ -383,32 +383,30 @@
       }
     }
 
-    // ตัวช่วยช่อง Technician (พิมพ์ตัวเลข หรือ V นำหน้า เช่น V11804 ได้)
+    // ตัวช่วยช่อง Technician (พิมพ์ตัวอักษรและตัวเลขได้อิสระทุกภาษา ไม่บล็อกปุ่มคีย์บอร์ด)
     const techIdInput = document.getElementById("techId");
     const btnPrefixV = document.getElementById("btnPrefixV");
 
     function updatePrefixVBtnStyle() {
-      const hasV = techIdInput.value.toUpperCase().startsWith("V");
+      const hasV = techIdInput.value.trim().toUpperCase().startsWith("V");
       btnPrefixV.className = hasV
         ? "absolute right-1.5 bg-blue-600 text-white border border-blue-600 font-bold text-[10px] px-2 py-1 rounded-lg transition active:scale-95"
         : "absolute right-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-bold text-[10px] px-2 py-1 rounded-lg transition active:scale-95";
       btnPrefixV.innerText = hasV ? "V✓" : "+V";
     }
 
-    techIdInput.addEventListener("input", (e) => {
-      if (e.isComposing) return;
-      const cleaned = techIdInput.value.toUpperCase().replace(/[^A-Z0-9-]/g, "");
-      if (techIdInput.value !== cleaned) {
-        const pos = techIdInput.selectionStart;
-        techIdInput.value = cleaned;
-        if (pos !== null) techIdInput.setSelectionRange(pos, pos);
-      }
+    techIdInput.addEventListener("input", () => {
+      updatePrefixVBtnStyle();
+    });
+
+    techIdInput.addEventListener("blur", () => {
+      techIdInput.value = techIdInput.value.trim().toUpperCase();
       updatePrefixVBtnStyle();
     });
 
     btnPrefixV.addEventListener("click", () => {
-      const val = techIdInput.value.trim().toUpperCase();
-      if (val.startsWith("V")) {
+      const val = techIdInput.value.trim();
+      if (val.toUpperCase().startsWith("V")) {
         techIdInput.value = val.slice(1);
       } else {
         techIdInput.value = "V" + val;
@@ -429,14 +427,9 @@
     }
 
     [partNoInput, lotNoInput].forEach(el => {
-      el.addEventListener("input", (e) => {
-        if (e.isComposing) return;
-        const upper = el.value.toUpperCase();
-        if (el.value !== upper) {
-          const pos = el.selectionStart;
-          el.value = upper;
-          if (pos !== null) el.setSelectionRange(pos, pos);
-        }
+      el.addEventListener("input", syncClearButtons);
+      el.addEventListener("blur", () => {
+        el.value = el.value.trim().toUpperCase();
         syncClearButtons();
       });
     });
